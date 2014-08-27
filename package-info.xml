@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!DOCTYPE package-info SYSTEM "http://www.elkarte.net/site/package-info">
+<package-info xmlns="http://www.elkarte.net/site/package-info" xmlns:elk="http://www.elkarte.net/">
+	<id>Spuds:Misery</id>
+	<name>Misery</name>
+	<version>1.0</version>
+	<type>modification</type>
+
+	<install for="1.0 RC2 - 1.0.99">
+		<readme type="file" parsebbc="true">install-readme.txt</readme>
+		<database>install.php</database>
+		<require-file name="language/Misery.english.php" destination="LANGUAGEDIR/english">The language strings</require-file>
+		<require-file name="admin/ManageMisery.controller.php" destination="ADMINDIR">Admin Functions</require-file>
+		<require-file name="controllers/Misery.controller.php" destination="CONTROLLERDIR">Controller Functions</require-file>
+		<require-file name="template/Misery.template.php" destination="THEMEDIR/default">Templates</require-file>
+
+
+		<hook hook="integrate_actions" file="CONTROLLERDIR/Misery.controller.php" function="ia_misery" />,
+		<hook hook="integrate_load_permissions" file="CONTROLLERDIR/Misery.controller.php" function="ilp_misery" />,
+		<hook hook="integrate_admin_areas" file="CONTROLLERDIR/Misery.controller.php" function="iaa_misery" />,
+		<hook hook="integrate_action_post_before" file="CONTROLLERDIR/Misery.controller.php" function="iapb_misery" />,
+		<hook hook="integrate_action_messageindex_before" file="CONTROLLERDIR/Misery.controller.php" function="iamb_misery" />,
+		<hook hook="integrate_action_display_before" file="CONTROLLERDIR/Misery.controller.php" function="iadb_misery" />,
+		<hook hook="integrate_account_profile_fields" file="CONTROLLERDIR/Misery.controller.php" function="iapf_misery" />,
+		<hook hook="integrate_load_profile_fields" file="CONTROLLERDIR/Misery.controller.php" function="ilpf_misery" />,
+		<hook hook="integrate_member_context" file="CONTROLLERDIR/Misery.controller.php" function="imc_misery" />,
+		<hook hook="integrate_load_member_data" file="CONTROLLERDIR/Misery.controller.php" function="ilmd_misery" />,
+		<hook hook="integrate_sa_modify_security" file="CONTROLLERDIR/Misery.controller.php" function="iams_misery" />,
+		<hook hook="integrate_admin_search" file="CONTROLLERDIR/Misery.controller.php" function="ias_misery" />,
+		<hook hook="integrate_profile_save" file="CONTROLLERDIR/Misery.controller.php" function="ips_misery" />,
+		<hook hook="integrate_user_info" file="CONTROLLERDIR/Misery.controller.php" function="iui_misery" />,
+		<hook hook="integrate_action_personalmessage_before" file="CONTROLLERDIR/Misery.controller.php" function="iapmb_misery" />,
+		<hook hook="integrate_action_emailuser_before" file="CONTROLLERDIR/Misery.controller.php" function="iaeub_misery" />,
+		<hook hook="integrate_action_moderationcenter_after" file="CONTROLLERDIR/Misery.controller.php" function="iamca_misery" />,
+
+		<redirect url="?action=admin;area=securitysettings;sa=misery" type="inline">Please select the link below to be taken to the area of the addon panel where you can configure the settings.</redirect>
+	</install>
+
+	<uninstall for="1.0 RC2 - 1.0.99">
+		<hook reverse="true" hook="integrate_actions" file="CONTROLLERDIR/Misery.controller.php" function="ia_misery" />,
+		<hook reverse="true" hook="integrate_load_permissions" file="CONTROLLERDIR/Misery.controller.php" function="ilp_misery" />,
+		<hook reverse="true" hook="integrate_admin_areas" file="CONTROLLERDIR/Misery.controller.php" function="iaa_misery" />,
+		<hook reverse="true" hook="integrate_action_post_before" file="CONTROLLERDIR/Misery.controller.php" function="iapb_misery" />,
+		<hook reverse="true" hook="integrate_action_messageindex_before" file="CONTROLLERDIR/Misery.controller.php" function="iamb_misery" />,
+		<hook reverse="true" hook="integrate_action_display_before" file="CONTROLLERDIR/Misery.controller.php" function="iadb_misery" />,
+		<hook reverse="true" hook="integrate_account_profile_fields" file="CONTROLLERDIR/Misery.controller.php" function="iapf_misery" />,
+		<hook reverse="true" hook="integrate_load_profile_fields" file="CONTROLLERDIR/Misery.controller.php" function="ilpf_misery" />,
+		<hook reverse="true" hook="integrate_member_context" file="CONTROLLERDIR/Misery.controller.php" function="imc_misery" />,
+		<hook reverse="true" hook="integrate_load_member_data" file="CONTROLLERDIR/Misery.controller.php" function="ilmd_misery" />,
+		<hook reverse="true" hook="integrate_sa_modify_security" file="CONTROLLERDIR/Misery.controller.php" function="iams_misery" />,
+		<hook reverse="true" hook="integrate_admin_search" file="CONTROLLERDIR/Misery.controller.php" function="ias_misery" />,
+		<hook reverse="true" hook="integrate_profile_save" file="CONTROLLERDIR/Misery.controller.php" function="ips_misery" />,
+		<hook reverse="true" hook="integrate_user_info" file="CONTROLLERDIR/Misery.controller.php" function="iui_misery" />,
+		<hook reverse="true" hook="integrate_action_personalmessage_before" file="CONTROLLERDIR/Misery.controller.php" function="iapmb_misery" />,
+		<hook reverse="true" hook="integrate_action_emailuser_before" file="CONTROLLERDIR/Misery.controller.php" function="iaeub_misery" />,
+		<hook reverse="true" hook="integrate_action_moderationcenter_after" file="CONTROLLERDIR/Misery.controller.php" function="iamca_misery" />,
+
+		<remove-file name="CONTROLLERDIR/Misery.controller.php" />
+		<remove-file name="ADMINDIR/ManageMisery.controller.php" />
+		<remove-file name="LANGUAGEDIR/english/Misery.english.php" />
+		<remove-file name="THEMEDIR/default/Misery.template.php" />
+
+	</uninstall>
+</package-info>

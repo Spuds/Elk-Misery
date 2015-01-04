@@ -20,8 +20,8 @@ if (!defined('ELK'))
  * - Normally used to add actions, we use it to apply the on every page load
  * misery items as well as redirection.
  *
- * @param type $actionArray
- * @param type $adminActions
+ * @param mixed[] $actionArray
+ * @param string $adminActions
  */
 function ia_misery(&$actionArray, &$adminActions)
 {
@@ -83,7 +83,7 @@ function iaa_misery(&$admin_areas)
  * integrate_action_post_before hook
  *
  * Called before entry to post controller, used to apply some misery when
- * a member has selected post
+ * a member has selected to post
  *
  * @param string $action
  */
@@ -92,7 +92,7 @@ function iapb_misery($action)
 	global $user_info, $modSettings;
 
 	// Do they deserve a bit of misery when trying to post?
-	if (empty($modSettings['misery_enabled']) || !$user_info['misery'] || $action !== 'action_post2')
+	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'] || $action !== 'action_post2')
 		return;
 
 	// These can hit on every page load
@@ -112,10 +112,10 @@ function iapmb_misery()
 	global $user_info, $modSettings;
 
 	// Do they deserve a bit of misery when trying to PM?
-	if (empty($modSettings['misery_enabled']) || !$user_info['misery'] || !isset($_GET['sa']) || $_GET['sa'] !== 'send2')
+	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'] || !isset($_GET['sa']) || $_GET['sa'] !== 'send2')
 		return;
 
-	// These can hit on every page load
+	// Lets see if we shall generate a PM error
 	make_miserable('pmerror');
 }
 
@@ -156,10 +156,10 @@ function iaeub_misery($action)
 	global $user_info, $modSettings;
 
 	// Do they deserve a bit of misery when trying to send an email?
-	if (empty($modSettings['misery_enabled']) || !$user_info['misery'] || $action !== 'action_email' || !isset($_POST['send']))
+	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'] || $action !== 'action_email' || !isset($_POST['send']))
 		return;
 
-	// These can hit on every page load
+	// Maybe they get an email error
 	make_miserable('emailerror');
 }
 
@@ -170,6 +170,12 @@ function iaeub_misery($action)
  */
 function iamb_misery()
 {
+	global $modSettings, $user_info;
+
+	// Do they deserve a bit of misery?
+	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'])
+		return false;
+
 	// These can hit on every page load
 	make_miserable_pageload();
 
@@ -184,6 +190,12 @@ function iamb_misery()
  */
 function iadb_misery()
 {
+	global $modSettings, $user_info;
+
+	// Do they deserve a bit of misery?
+	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'])
+		return false;
+
 	// These can hit on every page load
 	make_miserable_pageload();
 
@@ -194,7 +206,10 @@ function iadb_misery()
 // integrate_account_profile_fields
 function iapf_misery(&$fields)
 {
-	if (allowedTo('misery'))
+	global $modSettings;
+
+	// Do they deserve a bit of misery?
+	if (!empty($modSettings['misery_enabled']) && allowedTo('misery'))
 		$fields = elk_array_insert($fields, 'id_group', array('misery'), 'after', false);
 }
 
@@ -208,7 +223,11 @@ function iapf_misery(&$fields)
  */
 function ilpf_misery(&$profile_fields)
 {
-	global $txt, $cur_profile;
+	global $txt, $cur_profile, $modSettings, $user_info;
+
+	// Can you see this or use this?
+	if (empty($modSettings['misery_enabled']) || !allowedTo('misery'))
+		return false;
 
 	loadLanguage('Misery');
 
@@ -269,7 +288,7 @@ function iui_misery()
 {
 	global $user_info, $user_settings;
 
-	// The the users unseen items flag
+	// The the users misery flag
 	$user_info['misery'] = empty($user_settings['misery']) ? 0 : 1;
 }
 

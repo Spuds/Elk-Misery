@@ -25,12 +25,6 @@ if (!defined('ELK'))
  */
 function ia_misery(&$actionArray, &$adminActions)
 {
-	global $modSettings, $user_info;
-
-	// Do they deserve a bit of misery?
-	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'])
-		return false;
-
 	// These can hit on every page load
 	make_miserable_pageload();
 
@@ -89,13 +83,11 @@ function iaa_misery(&$admin_areas)
  */
 function iapb_misery($action)
 {
-	global $user_info, $modSettings;
-
 	// Do they deserve a bit of misery when trying to post?
-	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'] || $action !== 'action_post2')
+	if ($action !== 'action_post2')
 		return;
 
-	// These can hit on every page load
+	// So then maybe they get a post error
 	make_miserable('posterror');
 }
 
@@ -109,10 +101,8 @@ function iapb_misery($action)
  */
 function iapmb_misery()
 {
-	global $user_info, $modSettings;
-
 	// Do they deserve a bit of misery when trying to PM?
-	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'] || !isset($_GET['sa']) || $_GET['sa'] !== 'send2')
+	if (!isset($_GET['sa']) || $_GET['sa'] !== 'send2')
 		return;
 
 	// Lets see if we shall generate a PM error
@@ -153,10 +143,8 @@ function iamca_misery($action)
  */
 function iaeub_misery($action)
 {
-	global $user_info, $modSettings;
-
 	// Do they deserve a bit of misery when trying to send an email?
-	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'] || $action !== 'action_email' || !isset($_POST['send']))
+	if ($action !== 'action_email' || !isset($_POST['send']))
 		return;
 
 	// Maybe they get an email error
@@ -170,12 +158,6 @@ function iaeub_misery($action)
  */
 function iamb_misery()
 {
-	global $modSettings, $user_info;
-
-	// Do they deserve a bit of misery?
-	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'])
-		return false;
-
 	// These can hit on every page load
 	make_miserable_pageload();
 
@@ -190,12 +172,6 @@ function iamb_misery()
  */
 function iadb_misery()
 {
-	global $modSettings, $user_info;
-
-	// Do they deserve a bit of misery?
-	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'])
-		return false;
-
 	// These can hit on every page load
 	make_miserable_pageload();
 
@@ -208,7 +184,7 @@ function iapf_misery(&$fields)
 {
 	global $modSettings;
 
-	// Do they deserve a bit of misery?
+	// Can they impart misery?
 	if (!empty($modSettings['misery_enabled']) && allowedTo('misery'))
 		$fields = elk_array_insert($fields, 'id_group', array('misery'), 'after', false);
 }
@@ -223,11 +199,11 @@ function iapf_misery(&$fields)
  */
 function ilpf_misery(&$profile_fields)
 {
-	global $txt, $cur_profile, $modSettings, $user_info;
+	global $txt, $cur_profile, $modSettings;
 
 	// Can you see this or use this?
 	if (empty($modSettings['misery_enabled']) || !allowedTo('misery'))
-		return false;
+		return;
 
 	loadLanguage('Misery');
 
@@ -342,7 +318,7 @@ function ias_misery(&$language_files, &$include_files, &$settings_search)
 function ips_misery(&$profile_vars, &$post_errors, $memID)
 {
 	if (isset($_POST['misery']))
-		$profile_vars['misery'] = isset($_POST['misery']) ? 1 : 0;
+		$profile_vars['misery'] = !empty($_POST['misery']) ? 1 : 0;
 }
 
 /**
@@ -350,6 +326,12 @@ function ips_misery(&$profile_vars, &$post_errors, $memID)
  */
 function make_miserable_pageload()
 {
+	global $modSettings, $user_info;
+
+	// Do they deserve a bit of misery?
+	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'])
+		return;
+
 	// These can hit on every page load
 	make_miserable('randomdelay');
 	make_miserable('serverbusy');
@@ -361,13 +343,17 @@ function make_miserable_pageload()
 }
 
 /**
- * Applys the misery based on the $type provided
+ * Apply's the misery based on the $type provided
  *
  * @param string $type the type of misery for them
  */
 function make_miserable($type = '')
 {
 	global $user_info, $txt, $modSettings, $boardurl, $context, $board, $topic;
+
+	// Make sure they deserve it, most do :P
+	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'])
+		return;
 
 	// If they have enabled this misery
 	$setting = 'misery_' . $type;
@@ -428,7 +414,7 @@ function make_miserable($type = '')
 				display_db_error();
 
 				break;
-			// Nothing like a white screen to add to thier misery
+			// Nothing like a white screen to add to their misery
 			case 'blankscreen':
 				die();
 

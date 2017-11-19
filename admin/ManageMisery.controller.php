@@ -215,7 +215,8 @@ class ManageMisery_Controller extends Action_Controller
 		if (($miserable_users = cache_get_data('misery_users', 240)) === null)
 		{
 			$request = $db->query('', '
-				SELECT id_member, real_name, last_login
+				SELECT 
+					id_member, real_name, last_login
 				FROM {db_prefix}members
 				WHERE misery = 1
 				ORDER BY last_login DESC

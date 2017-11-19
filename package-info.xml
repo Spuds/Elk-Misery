@@ -6,7 +6,7 @@
 	<version>1.0</version>
 	<type>addon</type>
 
-	<install for="1.0 - 1.0.99">
+	<install for="1.0 - 1.1.99">
 		<readme type="file" parsebbc="true">install-readme.txt</readme>
 		<license type="inline">This ElkArte addon is released under a MPL V1.1 license, a copy of it with its provisions is included with the package.</license>
 		<database>install.php</database>
@@ -36,7 +36,7 @@
 		<redirect url="?action=admin;area=securitysettings;sa=misery" type="inline">Please select the link below to be taken to the area of the addon panel where you can configure the settings.</redirect>
 	</install>
 
-	<uninstall for="1.0 - 1.0.99">
+	<uninstall for="1.0 - 1.1.99">
 		<hook reverse="true" hook="integrate_actions" file="CONTROLLERDIR/Misery.controller.php" function="ia_misery" />,
 		<hook reverse="true" hook="integrate_load_permissions" file="CONTROLLERDIR/Misery.controller.php" function="ilp_misery" />,
 		<hook reverse="true" hook="integrate_admin_areas" file="CONTROLLERDIR/Misery.controller.php" function="iaa_misery" />,

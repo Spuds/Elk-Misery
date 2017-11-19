@@ -7,7 +7,7 @@
  * @copyright (c) 2014 Spuds
  * @license Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
- * @version 1.0
+ * @version 1.1
  *
  */
 
@@ -22,6 +22,7 @@ if (!defined('ELK'))
  *
  * @param mixed[] $actionArray
  * @param string $adminActions
+ * @throws \Elk_Exception
  */
 function ia_misery(&$actionArray, &$adminActions)
 {
@@ -80,6 +81,7 @@ function iaa_misery(&$admin_areas)
  * a member has selected to post
  *
  * @param string $action
+ * @throws \Elk_Exception
  */
 function iapb_misery($action)
 {
@@ -97,7 +99,7 @@ function iapb_misery($action)
  * Called before entry to PM controller, used to apply some misery when
  * a member has selected to send a PM
  *
- * @param string $action
+ * @throws \Elk_Exception
  */
 function iapmb_misery()
 {
@@ -115,6 +117,7 @@ function iapmb_misery()
  * Called after exit of moderation center, used to add a status block to the mod center home page
  *
  * @param string $action
+ * @throws \Elk_Exception
  */
 function iamca_misery($action)
 {
@@ -140,6 +143,7 @@ function iamca_misery($action)
  * a member has selected to send an email
  *
  * @param string $action
+ * @throws \Elk_Exception
  */
 function iaeub_misery($action)
 {
@@ -179,7 +183,13 @@ function iadb_misery()
 	make_miserable('redirect_page');
 }
 
-// integrate_account_profile_fields
+/**
+ * integrate_account_profile_fields
+ *
+ * Called from setupProfileContext()
+ *
+ * @param array $fields
+ */
 function iapf_misery(&$fields)
 {
 	global $modSettings;
@@ -250,7 +260,7 @@ function imc_misery($user)
  */
 function ilmd_misery(&$select_columns, &$select_tables, $set)
 {
-	if ($set == 'profile' || $set == 'normal')
+	if ($set === 'profile' || $set === 'normal')
 		$select_columns .= ',mem.misery';
 }
 
@@ -346,6 +356,7 @@ function make_miserable_pageload()
  * Apply's the misery based on the $type provided
  *
  * @param string $type the type of misery for them
+ * @throws \Elk_Exception
  */
 function make_miserable($type = '')
 {
@@ -354,6 +365,8 @@ function make_miserable($type = '')
 	// Make sure they deserve it, most do :P
 	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'])
 		return;
+
+	$elk_11 = substr(FORUM_VERSION, 8, 3) === '1.1';
 
 	// If they have enabled this misery
 	$setting = 'misery_' . $type;
@@ -402,7 +415,10 @@ function make_miserable($type = '')
 			// Let them think the server is overloaded
 			case 'serverbusy':
 				require_once(SOURCEDIR . '/Errors.php');
-				display_loadavg_error();
+				if ($elk_11)
+					Errors::instance()->display_loadavg_error();
+				else
+					display_loadavg_error();
 
 				break;
 			// Let them think the database is not available
@@ -411,7 +427,10 @@ function make_miserable($type = '')
 
 				unset($db_error_send);
 				require_once(SOURCEDIR . '/Errors.php');
-				display_db_error();
+				if ($elk_11)
+					Errors::instance()->display_db_error();
+				else
+					display_db_error();
 
 				break;
 			// Nothing like a white screen to add to their misery
@@ -464,8 +483,12 @@ function make_miserable($type = '')
 				break;
 			// I love it, I love my little naughty post, you're naughty! And then I take my naughty post and ...
 			case 'posterror':
+				if ($elk_11)
+					$post_errors = \ElkArte\Errors\ErrorContext::context('post', 1);
+				else
+					$post_errors = Error_Context::context('post', 1);
+
 				$seed = mt_rand(0, 1000) / 10;
-				$post_errors = Error_Context::context('post', 1);
 
 				// Maybe they get an error, or maybe just pretend they posted but its lost :'(
 				switch ($seed)
@@ -515,7 +538,11 @@ function make_miserable($type = '')
 				return $post_errors;
 			// PM ... Lets generate an error and blank out their work, or just pretend it sent
 			case 'pmerror':
-				$post_errors = Error_Context::context('pm', 1);
+				if ($elk_11)
+					$post_errors = \ElkArte\Errors\ErrorContext::context('pm', 1);
+				else
+					$post_errors = Error_Context::context('pm', 1);
+
 				$seed = mt_rand(0, 1000) / 10;
 
 				// What went wrong?

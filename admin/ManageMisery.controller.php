@@ -4,15 +4,12 @@
  *
  * @package "Misery" addon for ElkArte
  * @author Spuds
- * @copyright (c) 2014 Spuds
+ * @copyright (c) 2014-2021 Spuds
  * @license Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
- * @version 1.0
+ * @version 1.1.1
  *
  */
-
-if (!defined('ELK'))
-	die('No access...');
 
 /**
  * ManageSecurity controller handles the Security and Moderation
@@ -24,6 +21,7 @@ class ManageMisery_Controller extends Action_Controller
 {
 	/**
 	 * Spam settings form.
+	 *
 	 * @var Settings_Form
 	 */
 	protected $_miserySettings;
@@ -73,7 +71,9 @@ class ManageMisery_Controller extends Action_Controller
 			}
 
 			if ($_POST['randomdelay_max'] < $_POST['randomdelay_min'])
+			{
 				list($_POST['randomdelay_min'], $_POST['randomdelay_max']) = array($_POST['randomdelay_max'], $_POST['randomdelay_min']);
+			}
 
 			checkSession();
 			Settings_Form::save_db($config_vars);
@@ -110,7 +110,7 @@ class ManageMisery_Controller extends Action_Controller
 	{
 		global $txt;
 
-		$config_vars = array(
+		return array(
 			array('check', 'misery_enabled'),
 			array('title', 'misery_EveryPage'),
 			array('desc', 'misery_EveryPage_desc'),
@@ -144,8 +144,6 @@ class ManageMisery_Controller extends Action_Controller
 			array('int', 'misery_unread', 'postinput' => '%'),
 			array('int', 'misery_recent', 'postinput' => '%'),
 		);
-
-		return $config_vars;
 	}
 
 	/**
@@ -172,13 +170,17 @@ class ManageMisery_Controller extends Action_Controller
 
 		// Really, no user, really?
 		if (empty($_REQUEST['u']))
+		{
 			fatal_lang_error('no_access', false);
+		}
 
 		$user = (int) $_REQUEST['u'];
 
 		// Perhaps we should allow this, like gene pool cleansing
 		if ($user === $context['user']['id'])
+		{
 			fatal_lang_error('cannot_misery_yourself');
+		}
 
 		// Time to update this members flag
 		$request = $db->query('', '
@@ -224,7 +226,9 @@ class ManageMisery_Controller extends Action_Controller
 			);
 			$miserable_users = array();
 			while ($row = $db->fetch_assoc($request))
+			{
 				$miserable_users[] = $row;
+			}
 			$db->free_result($request);
 
 			cache_put_data('misery_users', $miserable_users, 240);

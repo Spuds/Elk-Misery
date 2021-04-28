@@ -4,15 +4,14 @@
  *
  * @package "Miserable User" addon for ElkArte
  * @author Spuds
- * @copyright (c) 2014 Spuds
+ * @copyright (c) 2014-2021 Spuds
  * @license Mozilla Public License version 1.1 http://www.mozilla.org/MPL/1.1/.
  *
- * @version 1.1
+ * @version 1.1.1
  *
  */
 
-if (!defined('ELK'))
-	die('No access...');
+use ElkArte\Errors\ErrorContext;
 
 /**
  * integrate_actions hook
@@ -20,7 +19,7 @@ if (!defined('ELK'))
  * - Normally used to add actions, we use it to apply the on every page load
  * misery items as well as redirection.
  *
- * @param mixed[] $actionArray
+ * @param array $actionArray
  * @param string $adminActions
  * @throws \Elk_Exception
  */
@@ -31,11 +30,15 @@ function ia_misery(&$actionArray, &$adminActions)
 
 	// You might not go where you think
 	if (isset($_GET['action']) && isset($actionArray[$_GET['action']]) && !in_array($_GET['action'], $adminActions))
+	{
 		make_miserable('redirect_page');
+	}
 
 	// And a few features may not be available
 	if (isset($_GET['action']) && in_array($_GET['action'], array('search', 'unreadreplies', 'show_posts', 'unread', 'recent')))
+	{
 		make_miserable($_GET['action']);
+	}
 }
 
 /**
@@ -87,7 +90,9 @@ function iapb_misery($action)
 {
 	// Do they deserve a bit of misery when trying to post?
 	if ($action !== 'action_post2')
+	{
 		return;
+	}
 
 	// So then maybe they get a post error
 	make_miserable('posterror');
@@ -105,7 +110,9 @@ function iapmb_misery()
 {
 	// Do they deserve a bit of misery when trying to PM?
 	if (!isset($_GET['sa']) || $_GET['sa'] !== 'send2')
+	{
 		return;
+	}
 
 	// Lets see if we shall generate a PM error
 	make_miserable('pmerror');
@@ -125,7 +132,9 @@ function iamca_misery($action)
 
 	// Show the who is miserable block in the moderation center
 	if (empty($modSettings['misery_enabled']) || !allowedTo('misery') || isset($_REQUEST['sa']))
+	{
 		return;
+	}
 
 	// Find out who is miserable
 	require_once(ADMINDIR . '/ManageMisery.controller.php');
@@ -149,7 +158,9 @@ function iaeub_misery($action)
 {
 	// Do they deserve a bit of misery when trying to send an email?
 	if ($action !== 'action_email' || !isset($_POST['send']))
+	{
 		return;
+	}
 
 	// Maybe they get an email error
 	make_miserable('emailerror');
@@ -196,7 +207,9 @@ function iapf_misery(&$fields)
 
 	// Can they impart misery?
 	if (!empty($modSettings['misery_enabled']) && allowedTo('misery'))
+	{
 		$fields = elk_array_insert($fields, 'id_group', array('misery'), 'after', false);
+	}
 }
 
 /**
@@ -205,7 +218,7 @@ function iapf_misery(&$fields)
  * - Called from profile.subs
  * - Used to add additional fields to the profile createlist
  *
- * @param mixed[] $profile_fields
+ * @param array $profile_fields
  */
 function ilpf_misery(&$profile_fields)
 {
@@ -213,13 +226,15 @@ function ilpf_misery(&$profile_fields)
 
 	// Can you see this or use this?
 	if (empty($modSettings['misery_enabled']) || !allowedTo('misery'))
+	{
 		return;
+	}
 
 	loadLanguage('Misery');
 
 	$profile_fields['misery'] = array(
 		'type' => 'check',
-		'value' => empty($cur_profile['misery']) ? false : true,
+		'value' => !empty($cur_profile['misery']),
 		'label' => $txt['add_to_misery'],
 		'permission' => 'misery',
 		'input_validate' => create_function('&$value', '
@@ -237,7 +252,6 @@ function ilpf_misery(&$profile_fields)
  * - Used to add items to the $memberContext array
  *
  * @param int $user
- * @param mixed $display_custom_fields
  */
 function imc_misery($user)
 {
@@ -255,13 +269,15 @@ function imc_misery($user)
  * - Used to add columns / tables to the query so additional data can be loaded for a set
  *
  * @param string $select_columns
- * @param mixed[] $select_tables
+ * @param array $select_tables
  * @param string $set
  */
 function ilmd_misery(&$select_columns, &$select_tables, $set)
 {
 	if ($set === 'profile' || $set === 'normal')
+	{
 		$select_columns .= ',mem.misery';
+	}
 }
 
 /**
@@ -283,7 +299,7 @@ function iui_misery()
  *
  * - Add our misery tab to the list of security options
  *
- * @param mixed[] $subactions
+ * @param array $subactions
  */
 function iams_misery(&$subactions)
 {
@@ -321,14 +337,16 @@ function ias_misery(&$language_files, &$include_files, &$settings_search)
  * - Profile save fields hook, called from Profile.controller.php
  * - used to prep and check variables before a profile update is saved
  *
- * @param mixed[] $profile_vars
- * @param mixed[] $post_errors
+ * @param array $profile_vars
+ * @param array $post_errors
  * @param int $memID
  */
 function ips_misery(&$profile_vars, &$post_errors, $memID)
 {
 	if (isset($_POST['misery']))
+	{
 		$profile_vars['misery'] = !empty($_POST['misery']) ? 1 : 0;
+	}
 }
 
 /**
@@ -340,7 +358,9 @@ function make_miserable_pageload()
 
 	// Do they deserve a bit of misery?
 	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'])
+	{
 		return;
+	}
 
 	// These can hit on every page load
 	make_miserable('randomdelay');
@@ -364,7 +384,9 @@ function make_miserable($type = '')
 
 	// Make sure they deserve it, most do :P
 	if (empty($modSettings['misery_enabled']) || empty($user_info['misery']) || $user_info['is_admin'])
-		return;
+	{
+		return true;
+	}
 
 	$elk_11 = substr(FORUM_VERSION, 8, 3) === '1.1';
 
@@ -375,11 +397,13 @@ function make_miserable($type = '')
 	{
 		// Each misery has its own chance to hit
 		$chance = (int) $modSettings[$setting];
-		$lotto = mt_rand(0, 100);
+		$lotto = random_int(0, 100);
 
 		// Buy a lotto ticket, you just got lucky
 		if ($lotto > $chance)
-			return;
+		{
+			return true;
+		}
 
 		// To bad for you, time for some misery
 		switch ($type)
@@ -389,12 +413,14 @@ function make_miserable($type = '')
 				if ($modSettings['misery_randomdelay_min'] <= $modSettings['misery_randomdelay_max'] && ($modSettings['misery_randomdelay_min'] > 0 || $modSettings['misery_randomdelay_max'] > 0))
 				{
 					if (function_exists('apache_reset_timeout'))
+					{
 						@apache_reset_timeout();
+					}
 
 					// Pick a wait time based on the limits
 					$wait_min = $modSettings['misery_randomdelay_min'];
 					$wait_max = $modSettings['misery_randomdelay_max'];
-					$wait_time = mt_rand($wait_min, $wait_max);
+					$wait_time = random_int($wait_min, $wait_max);
 
 					// Zzzzz
 					@set_time_limit($wait_time + 30);
@@ -416,9 +442,13 @@ function make_miserable($type = '')
 			case 'serverbusy':
 				require_once(SOURCEDIR . '/Errors.php');
 				if ($elk_11)
+				{
 					Errors::instance()->display_loadavg_error();
+				}
 				else
+				{
 					display_loadavg_error();
+				}
 
 				break;
 			// Let them think the database is not available
@@ -428,16 +458,18 @@ function make_miserable($type = '')
 				unset($db_error_send);
 				require_once(SOURCEDIR . '/Errors.php');
 				if ($elk_11)
+				{
 					Errors::instance()->display_db_error();
+				}
 				else
+				{
 					display_db_error();
+				}
 
 				break;
 			// Nothing like a white screen to add to their misery
 			case 'blankscreen':
 				die();
-
-				break;
 			// HTTP headers can be fun as well, makes them think something is broke
 			case 'serverhttperror':
 				$status_codes = array(
@@ -458,7 +490,7 @@ function make_miserable($type = '')
 				);
 
 				// Pick a random header
-				$status_error = $status_codes[mt_rand(0, count($status_codes) - 1)];
+				$status_error = $status_codes[random_int(0, count($status_codes) - 1)];
 				list($status_code, $status_string, $status_html) = explode('~', $status_error);
 
 				// Send it and bow out
@@ -470,13 +502,13 @@ function make_miserable($type = '')
 
 				echo $status_html;
 				die();
-
-				break;
 			// Redirect them to a new place, makes them mad
 			case 'redirect_page':
 				// Specific location given or just the front page.
 				if (empty($modSettings['misery_redirect']))
+				{
 					$modSettings['misery_redirect'] = $boardurl;
+				}
 
 				redirectexit($modSettings['misery_redirect']);
 
@@ -484,11 +516,15 @@ function make_miserable($type = '')
 			// I love it, I love my little naughty post, you're naughty! And then I take my naughty post and ...
 			case 'posterror':
 				if ($elk_11)
-					$post_errors = \ElkArte\Errors\ErrorContext::context('post', 1);
+				{
+					$post_errors = ErrorContext::context('post', 1);
+				}
 				else
+				{
 					$post_errors = Error_Context::context('post', 1);
+				}
 
-				$seed = mt_rand(0, 1000) / 10;
+				$seed = random_int(0, 1000) / 10;
 
 				// Maybe they get an error, or maybe just pretend they posted but its lost :'(
 				switch ($seed)
@@ -526,11 +562,17 @@ function make_miserable($type = '')
 					default:
 						// Lets act like we posted, but we have not
 						if (isset($_REQUEST['msg']) && !empty($_REQUEST['goback']) && !empty($topic))
+						{
 							redirectexit('topic=' . $topic . '.msg' . $_REQUEST['msg'] . '#msg' . $_REQUEST['msg'], isBrowser('ie'));
+						}
 						elseif (!empty($_REQUEST['goback']) && !empty($topic))
-							redirectexit('topic=' . $topic . '.new#new', isBrowser('ie'));
+						{
+							redirectexit('topic=' . $topic . '.new#new');
+						}
 						else
+						{
 							redirectexit('board=' . $board . '.0');
+						}
 
 						break;
 				}
@@ -539,11 +581,15 @@ function make_miserable($type = '')
 			// PM ... Lets generate an error and blank out their work, or just pretend it sent
 			case 'pmerror':
 				if ($elk_11)
-					$post_errors = \ElkArte\Errors\ErrorContext::context('pm', 1);
+				{
+					$post_errors = ErrorContext::context('pm', 1);
+				}
 				else
+				{
 					$post_errors = Error_Context::context('pm', 1);
+				}
 
-				$seed = mt_rand(0, 1000) / 10;
+				$seed = random_int(0, 1000) / 10;
 
 				// What went wrong?
 				switch ($seed)
@@ -561,7 +607,7 @@ function make_miserable($type = '')
 
 						break;
 					// 10% you loose the message
-					case ($seed <= 100):
+					case ($seed <= 60):
 						$post_errors->addError('no_message');
 						$_REQUEST['message'] = '';
 						$_POST['message'] = '';
@@ -574,14 +620,14 @@ function make_miserable($type = '')
 						break;
 					// 35% it says it sent, but nothing happens
 					default:
-						redirectexit((isset($context['current_label_redirect']) ? $context['current_label_redirect'] : 'action=pm'));
+						redirectexit(($context['current_label_redirect'] ?? 'action=pm'));
 				}
 
 				return $post_errors;
 			// Let them think they sent and email, but they did not
 			case 'emailerror':
 				$email_errors = '';
-				$seed = mt_rand(0, 100);
+				$seed = random_int(0, 100);
 
 				// What went wrong?
 				switch ($seed)
@@ -605,24 +651,34 @@ function make_miserable($type = '')
 					case ($seed <= 60):
 						$_REQUEST['email_subject'] = '';
 						$_POST['email_subject'] = '';
+
+						break;
 					// 10% you get to enter the message again
 					case ($seed <= 70):
 						$_REQUEST['email_body'] = '';
 						$_POST['email_body'] = '';
 
 						break;
-					// 30% it goes notwhere, but acts like it did
+					// 30% it goes nowhere, but acts like it did
 					default:
 						if (isset($_REQUEST['uid']))
+						{
 							redirectexit('action=profile;u=' . (int) $_REQUEST['uid']);
+						}
 						elseif (isset($_REQUEST['msg']))
+						{
 							redirectexit('msg=' . (int) $_REQUEST['msg']);
+						}
 						else
+						{
 							redirectexit();
+						}
 				}
 
 				if (!empty($email_errors))
+				{
 					fatal_lang_error($email_errors, false, array(300));
+				}
 
 				break;
 			// Popup messages are a pain to their existence
@@ -645,11 +701,15 @@ function make_miserable($type = '')
 			case 'unread':
 			case 'recent':
 				if (!in_array($type, array('search', 'unreadreplies', 'show_posts', 'unread', 'allunread')))
+				{
 					$type = 'generic';
+				}
 
 				fatal_lang_error('loadavg_' . $type . '_disabled', false);
 
 				break;
 		}
 	}
+
+	return true;
 }
